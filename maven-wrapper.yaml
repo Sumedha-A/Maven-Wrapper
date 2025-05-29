@@ -1,0 +1,27 @@
+name: Maven CI with JFrog CLI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        with:
+          version: latest
+          jfrog-url: ${{ secrets.JF_URL }}
+          jfrog-username: ${{ secrets.JF_USER }}
+          jfrog-password: ${{ secrets.JF_PASSWORD }}
+
+      - name: Build with Maven Wrapper
+        run: |
+          ./mvnw clean install
+          jf rt build-collect-env my-build 1
+          jf rt build-add-dependencies my-build 1
+          jf rt build-publish my-build 1
